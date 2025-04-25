@@ -1,0 +1,1459 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Video Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6e48aa;
+      --secondary: #9d50bb;
+      --accent: #4776e6;
+      --dark: #1a1a2e;
+      --darker: #16213e;
+      --light: #f1f1f1;
+      --danger: #e94560;
+      --success: #00b894;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, var(--darker), var(--dark));
+      color: var(--light);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .room-id {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+    }
+
+    .videos-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .video-container {
+      position: relative;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+      aspect-ratio: 16/9;
+    }
+
+    .video-container:hover {
+      transform: translateY(-5px);
+    }
+
+    .video-container.local {
+      border: 2px solid var(--accent);
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .user-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      padding: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .username {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .control-btn.active {
+      background: var(--danger);
+    }
+
+    .control-btn.mute.active {
+      background: var(--success);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--dark);
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--light);
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .btn {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(110, 72, 170, 0.4);
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    #muteBtn > img {
+      display: none;
+    }
+
+    #muteBtn.active > svg {
+      display: none;
+    }
+    #muteBtn.active > img {
+      display: block;
+    }
+
+
+
+    @media (max-width: 768px) {
+      .videos-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .video-container {
+        min-height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">NeonChat</div>
+      <div class="room-id" id="roomIdDisplay">Room: Loading...</div>
+    </header>
+
+    <div class="videos-container" id="videosContainer">
+      <div class="video-container local" id="localVideoContainer">
+        <video id="localVideo" autoplay muted playsinline></video>
+        <div class="user-info">
+          <span class="username">You</span>
+          <div class="controls">
+            <button class="control-btn mute" id="muteBtn" title="Mute">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+
+              <img src="/icons/mute.svg" alt="unmute" width="24" height="24" >
+            </button>
+            <button class="control-btn" id="videoBtn" title="Toggle Video">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="joinModal">
+    <div class="modal-content">
+      <h2 class="modal-title">Join Video Room</h2>
+      <div class="input-group">
+        <label for="usernameInput">Your Name</label>
+        <input type="text" id="usernameInput" placeholder="Enter your name">
+      </div>
+      <div class="input-group">
+        <label for="roomIdInput">Room ID</label>
+        <input type="text" id="roomIdInput" placeholder="Enter room ID">
+      </div>
+      <button class="btn btn-block" id="joinBtn">Join Room</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+  
+    const localVideo = document.getElementById("localVideo");
+    const videosContainer = document.getElementById("videosContainer");
+    const roomIdDisplay = document.getElementById("roomIdDisplay");
+    const joinModal = document.getElementById("joinModal");
+    const usernameInput = document.getElementById("usernameInput");
+    const roomIdInput = document.getElementById("roomIdInput");
+    const joinBtn = document.getElementById("joinBtn");
+    const muteBtn = document.getElementById("muteBtn");
+    const videoBtn = document.getElementById("videoBtn");
+  
+    const peerConnections = {};
+    const config = {
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+    };
+  
+    let localStream;
+    let currentRoomId;
+    let isMuted = false;
+  
+    // Join modal
+    joinModal.style.display = "flex";
+    joinBtn.addEventListener("click", async () => {
+      currentRoomId = roomIdInput.value.trim() || generateRoomId();
+      roomIdDisplay.textContent = `Room: ${currentRoomId}`;
+      try {
+        await initLocalStream();
+        socket.emit("join", currentRoomId);
+        joinModal.style.display = "none";
+      } catch (err) {
+        alert("Mic permission is required.");
+      }
+    });
+  
+    function generateRoomId() {
+      return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+  
+    async function initLocalStream() {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      localVideo.srcObject = localStream;
+    }
+  
+    muteBtn.addEventListener("click", () => {
+      const audioTrack = localStream?.getAudioTracks()[0];
+      if (!audioTrack) return;
+  
+      isMuted = !isMuted;
+      audioTrack.enabled = !isMuted;
+      muteBtn.classList.toggle("active", isMuted);
+      
+      socket.emit("mute-status", { roomId: currentRoomId, isMuted });
+    });
+  
+    socket.on("all-users", users => {
+      users.forEach(userId => {
+        const pc = createPeerConnection(userId);
+        createOffer(userId); // we are the joiner => we send the offer
+      });
+    });
+  
+    socket.on("user-joined", userId => {
+      // we are already in room => we wait for offer
+      createPeerConnection(userId);
+    });
+  
+    socket.on("offer", async ({ sdp, caller }) => {
+      const pc = peerConnections[caller] || createPeerConnection(caller);
+      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.emit("answer", { sdp: answer, target: caller });
+    });
+  
+    socket.on("answer", async ({ sdp, responder }) => {
+      const pc = peerConnections[responder];
+      if (!pc.currentRemoteDescription && pc.signalingState === "have-local-offer") {
+        await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+      }
+    });
+  
+    socket.on("ice-candidate", async ({ candidate, from }) => {
+      const pc = peerConnections[from];
+      if (pc && candidate) {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    });
+  
+    socket.on("peer-mute-status", ({ peerId, isMuted }) => {
+      const indicator = document.getElementById(`mute-indicator-${peerId}`);
+      if (indicator) {
+        indicator.style.display = isMuted ? "block" : "none";
+      }
+    });
+  
+    socket.on("user-disconnected", id => {
+      document.getElementById(`remoteContainer-${id}`)?.remove();
+      peerConnections[id]?.close();
+      delete peerConnections[id];
+    });
+  
+    function createPeerConnection(userId) {
+      if (peerConnections[userId]) return peerConnections[userId];
+  
+      const pc = new RTCPeerConnection(config);
+      peerConnections[userId] = pc;
+  
+      localStream.getTracks().forEach(track => {
+        pc.addTrack(track, localStream);
+      });
+  
+      pc.onicecandidate = event => {
+        if (event.candidate) {
+          socket.emit("ice-candidate", {
+            target: userId,
+            candidate: event.candidate
+          });
+        }
+      };
+  
+      pc.ontrack = ({ streams: [stream] }) => {
+        if (document.getElementById(`remoteVideo-${userId}`)) return;
+  
+        const container = document.createElement("div");
+        container.className = "video-container";
+        container.id = `remoteContainer-${userId}`;
+  
+        const video = document.createElement("video");
+        video.id = `remoteVideo-${userId}`;
+        video.srcObject = stream;
+        video.autoplay = true;
+        video.playsInline = true;
+  
+        const userInfo = document.createElement("div");
+        userInfo.className = "user-info";
+  
+        const name = document.createElement("span");
+        name.className = "username";
+        name.textContent = `User ${userId.slice(0, 4)}`;
+  
+        const muteIcon = document.createElement("div");
+        muteIcon.className = "mute-indicator";
+        muteIcon.id = `mute-indicator-${userId}`;
+        muteIcon.innerHTML = '<img src="/icons/mute.svg" alt="unmute" width="24" height="24" >';
+        muteIcon.style.display = "none";
+  
+        userInfo.appendChild(name);
+        userInfo.appendChild(muteIcon);
+        container.appendChild(video);
+        container.appendChild(userInfo);
+        videosContainer.appendChild(container);
+      };
+  
+      return pc;
+    }
+  
+    async function createOffer(userId) {
+      const pc = peerConnections[userId];
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit("offer", { sdp: offer, target: userId });
+    }
+  </script>
+  
+</body>
+</html> -->
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Video Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6e48aa;
+      --secondary: #9d50bb;
+      --accent: #4776e6;
+      --dark: #1a1a2e;
+      --darker: #16213e;
+      --light: #f1f1f1;
+      --danger: #e94560;
+      --success: #00b894;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, var(--darker), var(--dark));
+      color: var(--light);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .room-id {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+    }
+
+    .videos-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .video-container {
+      position: relative;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+      aspect-ratio: 16/9;
+    }
+
+    .video-container:hover {
+      transform: translateY(-5px);
+    }
+
+    .video-container.local {
+      border: 2px solid var(--accent);
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .user-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      padding: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .username {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .control-btn.active {
+      background: var(--danger);
+    }
+
+    .control-btn.mute.active {
+      background: var(--success);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: var(--dark);
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--light);
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.8rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .btn {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(110, 72, 170, 0.4);
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+
+    #muteBtn > img {
+      display: none;
+    }
+
+    #muteBtn.active > svg {
+      display: none;
+    }
+    #muteBtn.active > img {
+      display: block;
+    }
+
+
+
+    @media (max-width: 768px) {
+      .videos-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .video-container {
+        min-height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">NeonChat</div>
+      <div class="room-id" id="roomIdDisplay">Room: Loading...</div>
+    </header>
+
+    <div class="videos-container" id="videosContainer">
+      <div class="video-container local" id="localVideoContainer">
+        <video id="localVideo" autoplay muted playsinline></video>
+        <div class="user-info">
+          <span class="username" id="localUsername">You</span>
+          <div class="controls">
+            <button class="control-btn mute" id="muteBtn" title="Mute">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+              <img src="/icons/mute.svg" alt="unmute" width="24" height="24" >
+            </button>
+            <button class="control-btn" id="videoBtn" title="Toggle Video">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="joinModal">
+    <div class="modal-content">
+      <h2 class="modal-title">Join Video Room</h2>
+      <div class="input-group">
+        <label for="usernameInput">Your Name</label>
+        <input type="text" id="usernameInput" placeholder="Enter your name">
+      </div>
+      <div class="input-group">
+        <label for="roomIdInput">Room ID</label>
+        <input type="text" id="roomIdInput" placeholder="Enter room ID">
+      </div>
+      <button class="btn btn-block" id="joinBtn">Join Room</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const localVideo = document.getElementById("localVideo");
+    const localUsernameDisplay = document.getElementById("localUsername");
+    const videosContainer = document.getElementById("videosContainer");
+    const roomIdDisplay = document.getElementById("roomIdDisplay");
+    const joinModal = document.getElementById("joinModal");
+    const usernameInput = document.getElementById("usernameInput");
+    const roomIdInput = document.getElementById("roomIdInput");
+    const joinBtn = document.getElementById("joinBtn");
+    const muteBtn = document.getElementById("muteBtn");
+    const videoBtn = document.getElementById("videoBtn");
+
+    const peerConnections = {};
+    const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+
+    let localStream;
+    let currentRoomId;
+    let localUsername = "";
+    let isMuted = false;
+
+    joinModal.style.display = "flex";
+    joinBtn.addEventListener("click", async () => {
+      currentRoomId = roomIdInput.value.trim() || generateRoomId();
+      localUsername = usernameInput.value.trim() || "Anonymous";
+      roomIdDisplay.textContent = `Room: ${currentRoomId}`;
+      localUsernameDisplay.textContent = localUsername;
+      try {
+        await initLocalStream();
+        socket.emit("join", { roomId: currentRoomId, username: localUsername });
+        joinModal.style.display = "none";
+      } catch (err) {
+        alert("Mic permission is required.");
+      }
+    });
+
+    function generateRoomId() {
+      return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    async function initLocalStream() {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      localVideo.srcObject = localStream;
+    }
+
+    muteBtn.addEventListener("click", () => {
+      const audioTrack = localStream?.getAudioTracks()[0];
+      if (!audioTrack) return;
+      isMuted = !isMuted;
+      audioTrack.enabled = !isMuted;
+      muteBtn.classList.toggle("active", isMuted);
+      socket.emit("mute-status", { roomId: currentRoomId, isMuted });
+    });
+
+    socket.on("all-users", users => {
+      users.forEach(({ id, username }) => {
+        const pc = createPeerConnection(id, username);
+        createOffer(id);
+      });
+    });
+
+    socket.on("user-joined", ({ id, username }) => {
+      createPeerConnection(id, username);
+    });
+
+    socket.on("offer", async ({ sdp, caller }) => {
+      const pc = peerConnections[caller] || createPeerConnection(caller);
+      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.emit("answer", { sdp: answer, target: caller });
+    });
+
+    socket.on("answer", async ({ sdp, responder }) => {
+      const pc = peerConnections[responder];
+      if (!pc.currentRemoteDescription && pc.signalingState === "have-local-offer") {
+        await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+      }
+    });
+
+    socket.on("ice-candidate", async ({ candidate, from }) => {
+      const pc = peerConnections[from];
+      if (pc && candidate) {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    });
+
+    socket.on("peer-mute-status", ({ peerId, isMuted }) => {
+      const indicator = document.getElementById(`mute-indicator-${peerId}`);
+      if (indicator) {
+        indicator.style.display = isMuted ? "block" : "none";
+      }
+    });
+
+    socket.on("user-disconnected", id => {
+      document.getElementById(`remoteContainer-${id}`)?.remove();
+      peerConnections[id]?.close();
+      delete peerConnections[id];
+    });
+
+    function createPeerConnection(userId, username = "User") {
+      if (peerConnections[userId]) return peerConnections[userId];
+      const pc = new RTCPeerConnection(config);
+      peerConnections[userId] = pc;
+
+      localStream.getTracks().forEach(track => {
+        pc.addTrack(track, localStream);
+      });
+
+      pc.onicecandidate = event => {
+        if (event.candidate) {
+          socket.emit("ice-candidate", { target: userId, candidate: event.candidate });
+        }
+      };
+
+      pc.ontrack = ({ streams: [stream] }) => {
+        if (document.getElementById(`remoteVideo-${userId}`)) return;
+
+        const container = document.createElement("div");
+        container.className = "video-container";
+        container.id = `remoteContainer-${userId}`;
+
+        const video = document.createElement("video");
+        video.id = `remoteVideo-${userId}`;
+        video.srcObject = stream;
+        video.autoplay = true;
+        video.playsInline = true;
+
+        const userInfo = document.createElement("div");
+        userInfo.className = "user-info";
+
+        const name = document.createElement("span");
+        name.className = "username";
+        name.textContent = username;
+
+        const muteIcon = document.createElement("div");
+        muteIcon.className = "mute-indicator";
+        muteIcon.id = `mute-indicator-${userId}`;
+        muteIcon.innerHTML = '<img src="/icons/mute.svg" alt="unmute" width="24" height="24">';
+        muteIcon.style.display = "none";
+
+        userInfo.appendChild(name);
+        userInfo.appendChild(muteIcon);
+        container.appendChild(video);
+        container.appendChild(userInfo);
+        videosContainer.appendChild(container);
+      };
+
+      return pc;
+    }
+
+    async function createOffer(userId) {
+      const pc = peerConnections[userId];
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit("offer", { sdp: offer, target: userId });
+    }
+  </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Video Chat</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #6e48aa;
+        --secondary: #9d50bb;
+        --accent: #4776e6;
+        --dark: #1a1a2e;
+        --darker: #16213e;
+        --light: #f1f1f1;
+        --danger: #e94560;
+        --success: #00b894;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Montserrat', sans-serif;
+        background: linear-gradient(135deg, var(--darker), var(--dark));
+        color: var(--light);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: 600;
+        background: linear-gradient(to right, var(--primary), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .room-id {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+      }
+
+      .videos-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .video-container {
+        position: relative;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+        aspect-ratio: 16/9;
+      }
+
+      .video-container:hover {
+        transform: translateY(-5px);
+      }
+
+      .video-container.local {
+        border: 2px solid var(--accent);
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #000;
+      }
+
+      .user-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        padding: 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .username {
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .controls {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .control-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        transition: all 0.2s ease;
+      }
+
+      .control-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+      .control-btn.active {
+        background: var(--danger);
+      }
+
+      .control-btn.mute.active {
+        background: var(--success);
+      }
+
+      .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+      }
+
+      .modal-content {
+        background: var(--dark);
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--light);
+      }
+
+      .input-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 0.8rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        color: white;
+        font-size: 1rem;
+      }
+
+      .btn {
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(110, 72, 170, 0.4);
+      }
+
+      .btn-block {
+        display: block;
+        width: 100%;
+      }
+
+      #muteBtn > img {
+        display: none;
+      }
+
+      #muteBtn.active > svg {
+        display: none;
+      }
+      #muteBtn.active > img {
+        display: block;
+      }
+
+      @media (max-width: 768px) {
+        .videos-container {
+          grid-template-columns: 1fr;
+        }
+
+        .video-container {
+          min-height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="logo">VideoChat</div>
+        <div class="room-id" id="roomIdDisplay">Room: Loading...</div>
+      </header>
+
+      <div class="videos-container" id="videosContainer">
+        <div class="video-container local" id="localVideoContainer">
+          <video id="localVideo" autoplay muted playsinline></video>
+          <div class="user-info">
+            <span class="username" id="localUsername">You</span>
+            <div class="controls">
+              <button class="control-btn mute" id="muteBtn" title="Mute">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                  ></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+                <img
+                  src="/icons/mute.svg"
+                  alt="unmute"
+                  width="24"
+                  height="24"
+                />
+              </button>
+              <button class="control-btn" id="videoBtn" title="Toggle Video">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="joinModal">
+      <div class="modal-content">
+        <h2 class="modal-title">Join Video Room</h2>
+        <div class="input-group">
+          <label for="usernameInput">Your Name</label>
+          <input type="text" id="usernameInput" placeholder="Enter your name" />
+        </div>
+        <div class="input-group">
+          <label for="roomIdInput">Room ID</label>
+          <input type="text" id="roomIdInput" placeholder="Enter room ID" />
+        </div>
+        <button class="btn btn-block" id="joinBtn">Join Room</button>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const peerConnections = {};
+      const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+      const localVideo = document.getElementById('localVideo');
+      const localUsernameDisplay = document.getElementById('localUsername');
+      const videosContainer = document.getElementById('videosContainer');
+      const roomIdDisplay = document.getElementById('roomIdDisplay');
+      const joinModal = document.getElementById('joinModal');
+      const usernameInput = document.getElementById('usernameInput');
+      const roomIdInput = document.getElementById('roomIdInput');
+      const joinBtn = document.getElementById('joinBtn');
+      const muteBtn = document.getElementById('muteBtn');
+
+      let localStream;
+      let currentRoomId;
+      let localUsername = '';
+      let isMuted = false;
+      const muteStatusMap = {}; // userId: true/false
+
+      joinModal.style.display = 'flex';
+      joinBtn.addEventListener('click', async () => {
+        currentRoomId = roomIdInput.value.trim() || generateRoomId();
+        localUsername = usernameInput.value.trim() || 'Anonymous';
+        localUsernameDisplay.textContent = 'You';
+        roomIdDisplay.textContent = `Room: ${currentRoomId}`;
+        try {
+          await initLocalStream();
+          socket.emit('join', {
+            roomId: currentRoomId,
+            username: localUsername,
+          });
+          joinModal.style.display = 'none';
+        } catch (err) {
+          alert('Mic permission is required.');
+        }
+      });
+
+      function generateRoomId() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+      }
+
+      async function initLocalStream() {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false,
+        });
+        localVideo.srcObject = localStream;
+      }
+
+      muteBtn.addEventListener('click', () => {
+        const audioTrack = localStream?.getAudioTracks()[0];
+        if (!audioTrack) return;
+        isMuted = !isMuted;
+        audioTrack.enabled = !isMuted;
+        muteBtn.classList.toggle('active', isMuted);
+        muteStatusMap[socket.id] = isMuted;
+        socket.emit('mute-status', { roomId: currentRoomId, isMuted });
+      });
+
+      socket.on('all-users', (users) => {
+        // users.forEach(({ id, username }) => {
+        //   const pc = createPeerConnection(id, username);
+        //   createOffer(id);
+          
+        // });
+
+        users.forEach(({ id, username, isMuted }) => {
+          const pc = createPeerConnection(id, username);
+          createOffer(id);
+
+          // Show mute status immediately after render
+          setTimeout(() => {
+            const indicator = document.getElementById(`mute-indicator-${id}`);
+            if (indicator) {
+              indicator.style.display = isMuted ? 'block' : 'none';
+            }
+          }, 300); // allow time for DOM to be ready
+        });
+      });
+
+      socket.on('user-joined', ({ id, username }) => {
+        createPeerConnection(id, username);
+        socket.emit('mute-status', {
+          roomId: currentRoomId,
+          isMuted,
+          target: id,
+        });
+      });
+
+      socket.on('offer', async ({ sdp, caller }) => {
+        const pc = peerConnections[caller] || createPeerConnection(caller);
+        await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit('answer', { sdp: answer, target: caller });
+      });
+
+      socket.on('answer', async ({ sdp, responder }) => {
+        const pc = peerConnections[responder];
+        if (
+          !pc.currentRemoteDescription &&
+          pc.signalingState === 'have-local-offer'
+        ) {
+          await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        }
+      });
+
+      socket.on('ice-candidate', async ({ candidate, from }) => {
+        const pc = peerConnections[from];
+        if (pc && candidate) {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+      });
+
+      socket.on('peer-mute-status', ({ peerId, isMuted }) => {
+        const indicator = document.getElementById(`mute-indicator-${peerId}`);
+        if (indicator) indicator.style.display = isMuted ? 'block' : 'none';
+      });
+
+      socket.on('user-disconnected', (id) => {
+        document.getElementById(`remoteContainer-${id}`)?.remove();
+        peerConnections[id]?.close();
+        delete peerConnections[id];
+      });
+
+      function createPeerConnection(userId, username = 'User') {
+        if (peerConnections[userId]) return peerConnections[userId];
+
+        const pc = new RTCPeerConnection(config);
+        peerConnections[userId] = pc;
+
+        localStream.getTracks().forEach((track) => {
+          pc.addTrack(track, localStream);
+        });
+
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            socket.emit('ice-candidate', {
+              target: userId,
+              candidate: event.candidate,
+            });
+          }
+        };
+
+        pc.ontrack = ({ streams: [stream] }) => {
+          if (document.getElementById(`remoteVideo-${userId}`)) return;
+
+          const container = document.createElement('div');
+          container.className = 'video-container';
+          container.id = `remoteContainer-${userId}`;
+
+          const video = document.createElement('video');
+          video.id = `remoteVideo-${userId}`;
+          video.srcObject = stream;
+          video.autoplay = true;
+          video.playsInline = true;
+
+          const userInfo = document.createElement('div');
+          userInfo.className = 'user-info';
+
+          const name = document.createElement('span');
+          name.className = 'username';
+          name.textContent = username;
+
+          const muteIcon = document.createElement('div');
+          muteIcon.className = 'mute-indicator';
+          muteIcon.id = `mute-indicator-${userId}`;
+          muteIcon.innerHTML =
+            '<img src="/icons/mute.svg" alt="unmute" width="24" height="24">';
+          muteIcon.style.display = 'none';
+
+          userInfo.appendChild(name);
+          userInfo.appendChild(muteIcon);
+          container.appendChild(video);
+          container.appendChild(userInfo);
+          videosContainer.appendChild(container);
+        };
+
+        return pc;
+      }
+
+      async function createOffer(userId) {
+        const pc = peerConnections[userId];
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        socket.emit('offer', { sdp: offer, target: userId });
+      }
+
+      // async function createOffer(userId) {
+      //   const pc = peerConnections[userId];
+
+      //   // Prevent duplicate offers if already connected
+      //   if (!pc || pc.signalingState !== 'stable') return;
+
+      //   try {
+      //     const offer = await pc.createOffer();
+      //     await pc.setLocalDescription(offer);
+      //     socket.emit('offer', { sdp: offer, target: userId });
+      //   } catch (err) {
+      //     console.warn('Offer failed for', userId, err);
+      //   }
+      // }
+    </script>
+  </body>
+</html>
